@@ -12,10 +12,11 @@ export function owner(now: number, lastPointer: number): "pointer" | "ghost" {
   return now - lastPointer > IDLE_MS ? "ghost" : "pointer";
 }
 
-/** A slow Lissajous path in page units (0..1, y up), biased to the right where the text isn't. */
-export function ghostAt(t: number): { x: number; y: number } {
-  return {
-    x: 0.66 + 0.2 * Math.sin(t * 0.31) * Math.cos(t * 0.17),
-    y: 0.5 + 0.3 * Math.sin(t * 0.23 + 1.3),
-  };
+/**
+ * A slow Lissajous path in page units (0..1, y up), kept where the text usually isn't:
+ * the right side on a wide screen, the lower middle on a tall one.
+ */
+export function ghostAt(t: number, portrait = false): { x: number; y: number } {
+  const u = Math.sin(t * 0.31) * Math.cos(t * 0.17), v = Math.sin(t * 0.23 + 1.3);
+  return portrait ? { x: 0.5 + 0.3 * u, y: 0.24 + 0.16 * v } : { x: 0.66 + 0.2 * u, y: 0.5 + 0.3 * v };
 }

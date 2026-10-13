@@ -10,6 +10,14 @@ describe("stir", () => {
     expect(owner(10000, 7000)).toBe("ghost");
     expect(owner(10000, 8000)).toBe("pointer");
   });
+  it("stirs the lower middle of a tall screen", () => {
+    for (let t = 0; t <= 600; t += 0.5) {
+      const { x, y } = ghostAt(t, true);
+      expect(x).toBeGreaterThanOrEqual(0.2);
+      expect(x).toBeLessThanOrEqual(0.8);
+      expect(y).toBeLessThanOrEqual(0.4);
+    }
+  });
   it("keeps the ghost on the page", () => {
     for (let t = 0; t <= 600; t += 0.5) {
       const { x, y } = ghostAt(t);

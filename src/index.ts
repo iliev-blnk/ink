@@ -79,7 +79,9 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   const rand = random(opts.seed ?? Date.now());
   function seed() {
     for (let i = 0; i < SEED.drops; i++) {
-      fluid.splat(0.55 + rand() * 0.3, 0.3 + rand() * 0.4, (rand() - 0.5) * SEED.force, (rand() - 0.5) * SEED.force,
+      const tall = height > width;
+      fluid.splat(tall ? 0.25 + rand() * 0.5 : 0.55 + rand() * 0.3, tall ? 0.1 + rand() * 0.3 : 0.3 + rand() * 0.4,
+        (rand() - 0.5) * SEED.force, (rand() - 0.5) * SEED.force,
         dyeColour(look, i, SEED.amount), SEED.radius);
     }
   }
@@ -113,7 +115,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   let ghostT = 0, ghost = ghostAt(0);
   function stirGhost(dt: number) {
     ghostT += dt;
-    const next = ghostAt(ghostT);
+    const next = ghostAt(ghostT, height > width);
     fluid.splat(next.x, next.y, (next.x - ghost.x) * GHOST.force, (next.y - ghost.y) * GHOST.force,
       dyeColour(look, Math.floor(ghostT / 9), GHOST.amount), GHOST.radius);
     ghost = next;
