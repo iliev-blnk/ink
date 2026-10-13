@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ink</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --paper:#fff; --ink:#141414; --mute:#8d8d89; }
+@media (prefers-color-scheme: dark) { :root { --paper:#0b0b0c; --ink:#ecebe6; --mute:#77756f; } }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { background:var(--paper); color:var(--ink); height:100%; overflow:hidden; }
+body { font:400 13px/17px "IBM Plex Mono", ui-monospace, monospace; }
+canvas { position:fixed; inset:0; width:100vw; height:100vh; display:block; touch-action:none; }
+.t { position:fixed; left:32px; white-space:pre; }
+.dim { color:var(--mute); }
+a { color:inherit; }
+</style>
+</head>
+<body>
+<canvas id="ink" aria-hidden="true"></canvas>
+<p class="t" style="top:48px" data-mask><b>ink</b></p>
+<p class="t dim" style="top:65px" data-mask>ink in water, drawn in characters</p>
+<p class="t dim" style="bottom:40px" data-mask>move to stir · click for another ink · <a href="https://github.com/iliev-blnk/ink">source</a></p>
+<pre class="ink-fallback" hidden></pre>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>
