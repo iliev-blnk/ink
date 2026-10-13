@@ -1,0 +1,29 @@
+{
+  "name": "ink",
+  "version": "0.1.0",
+  "description": "Ink in water, drawn in characters: a WebGL2 fluid simulation rendered as glyphs.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Ilie Beleniuc",
+  "main": "./dist/ink.js",
+  "exports": {
+    ".": "./dist/ink.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "build": "vite build",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "dev": "vite --config vite.demo.config.ts",
+    "smoke": "node e2e/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}
