@@ -6,7 +6,7 @@ import { createGlyphPass, type Grid } from "./glyphs";
 import { cellMask, type DOMRectLike } from "./mask";
 import { LEVELS, WINDOW, governor } from "./quality";
 import { STILL } from "./still";
-import { clampDt, ghostAt, owner } from "./stir";
+import { clampDt, ghostAt, owner, strokeDelta } from "./stir";
 import { LOOKS, dyeColour, lookFor, type LookName } from "./themes";
 
 export { LOOKS, lookFor } from "./themes";
@@ -101,14 +101,16 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   }
 
   // Input: the visitor stirs, a click changes the ink.
-  const ptr = { x: 0, y: 0, px: -1, py: -1, moved: false, last: -Infinity };
+  const ptr = { x: 0, y: 0, prev: null as { x: number; y: number } | null, moved: false, last: -Infinity, gap: 0 };
   let ink = 0;
   const onMove = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
     ptr.x = (e.clientX - r.left) / r.width;
     ptr.y = 1 - (e.clientY - r.top) / r.height;
+    const now = performance.now();
+    ptr.gap = now - ptr.last;
     ptr.moved = true;
-    ptr.last = performance.now();
+    ptr.last = now;
   };
   const onDown = () => { ink++; };
 
@@ -148,11 +150,9 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
     const dt = clampDt(raw);
     prev = now;
     if (ptr.moved) {
-      if (ptr.px >= 0) {
-        fluid.splat(ptr.x, ptr.y, (ptr.x - ptr.px) * POINTER.force, (ptr.y - ptr.py) * POINTER.force,
-          dyeColour(look, ink, POINTER.amount), POINTER.radius);
-      }
-      ptr.px = ptr.x; ptr.py = ptr.y; ptr.moved = false;
+      const at = { x: ptr.x, y: ptr.y }, { dx, dy } = strokeDelta(ptr.prev, at, ptr.gap);
+      fluid.splat(at.x, at.y, dx * POINTER.force, dy * POINTER.force, dyeColour(look, ink, POINTER.amount), POINTER.radius);
+      ptr.prev = at; ptr.moved = false;
     }
     if (owner(now, ptr.last) === "ghost") stirGhost(dt);
     fluid.step(dt);

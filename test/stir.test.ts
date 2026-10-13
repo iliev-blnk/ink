@@ -28,3 +28,16 @@ describe("stir", () => {
     }
   });
 });
+
+import { strokeDelta } from "../src/stir";
+describe("strokeDelta", () => {
+  it("pushes along the cursor's path between close moves", () => {
+    expect(strokeDelta({ x: 0.5, y: 0.5 }, { x: 0.52, y: 0.49 }, 16)).toEqual({ dx: expect.closeTo(0.02), dy: expect.closeTo(-0.01) });
+  });
+  it("doesn't fling the ink when the cursor comes back after a pause", () => {
+    expect(strokeDelta({ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }, 400)).toEqual({ dx: 0, dy: 0 });
+  });
+  it("starts from rest on the first move", () => {
+    expect(strokeDelta(null, { x: 0.4, y: 0.4 }, 16)).toEqual({ dx: 0, dy: 0 });
+  });
+});
