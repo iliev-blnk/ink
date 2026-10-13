@@ -16,3 +16,21 @@ describe("cellMask", () => {
     expect(m.every((v) => v === 0)).toBe(true);
   });
 });
+
+describe("cellMask feather", () => {
+  it("fades outward from a feathered rectangle", () => {
+    const cols = 60, rows = 4, cell = { w: 10, h: 10 };
+    const m = cellMask([{ left: 0, top: 0, right: 100, bottom: 40, feather: 200 }], cols, rows, cell);
+    const row = Array.from({ length: cols }, (_, c) => m[1 * cols + c]);
+    expect(row[5]).toBe(255);                       // inside
+    expect(row[14]).toBeGreaterThan(row[20]);        // fading with distance
+    expect(row[20]).toBeGreaterThan(row[28]);
+    expect(row[20]).toBeGreaterThan(0);
+    expect(row[40]).toBe(0);                         // beyond the feather
+    for (let c = 1; c < cols; c++) if (c > 12) expect(row[c]).toBeLessThanOrEqual(row[c - 1]);
+  });
+  it("keeps the strongest value where rectangles overlap", () => {
+    const m = cellMask([{ left: 0, top: 0, right: 50, bottom: 50, feather: 100 }, { left: 0, top: 0, right: 200, bottom: 50 }], 30, 5, { w: 10, h: 10 });
+    expect(m[2 * 30 + 15]).toBe(255);
+  });
+});

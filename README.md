@@ -54,6 +54,7 @@ mountInk(document.querySelector("canvas")!, {
 
 The options are:
 - `strength`: scales drop size and amount, for a small canvas such as a header band.
+- A mask rectangle may carry `feather` (px): the ink thins out over that distance instead of stopping at a hard edge.
 - `ghost(t, portrait)`: where the unseen hand stirs when nobody else does, in 0..1 page units with y up.
 - `look`: `"night"` or `"blue"`, to override the system theme.
 - `seed`: makes the opening drops repeatable.

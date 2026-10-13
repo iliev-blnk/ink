@@ -21,9 +21,11 @@ export function createGlyphPass(core: Core, atlas: WebGLTexture) {
     void main(){
       vec2 px = vec2(uv.x, 1.-uv.y) * grid * cellPx;
       vec2 cell = floor(px/cellPx); vec2 inCell = fract(px/cellPx);
-      if (texture(Mask, (cell+.5)/grid).r > .5) { o = vec4(paper,1); return; }
+      float mk = texture(Mask, (cell+.5)/grid).r;
+      if (mk > .995) { o = vec4(paper,1); return; }
       vec2 cellUp = vec2(cell.x, grid.y-1.-cell.y);
-      vec3 d = dyeAt(cellUp); float raw = lum(d); float v = smoothstep(.03, .5, raw);
+      // A feathered mask thins the ink toward the text: lighter glyphs first, then nothing.
+      vec3 d = dyeAt(cellUp); float raw = lum(d); float v = smoothstep(.03, .5, raw) * (1. - mk);
       float idx = floor(v*(ramp-1.)+.5);
       if (edges > .5) {
         float gx = lum(dyeAt(cellUp+vec2(1,0)))-lum(dyeAt(cellUp-vec2(1,0)));
