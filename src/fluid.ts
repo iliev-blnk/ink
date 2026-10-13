@@ -85,8 +85,14 @@ export function createFluid(core: Core, settings: FluidSettings = DEFAULTS) {
     gl.uniform1f(P.advect.u.dissipation, settings.dyeDissipation); core.draw(dye.write); dye.swap();
   }
 
+  /** Empties the dye, keeping the flow. Used when the look changes between light and absorbance. */
+  function clearDye() {
+    gl.useProgram(P.scale.p); gl.uniform1i(P.scale.u.T, dye.read.bind(0)); gl.uniform1f(P.scale.u.value, 0);
+    core.draw(dye.write); dye.swap();
+  }
+
   return {
-    resize, splat, step,
+    resize, splat, step, clearDye,
     get dye() { return dye.read; },
     destroy() { [vel, dye, prs, div, curlT].forEach(core.free); },
   };

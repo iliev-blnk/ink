@@ -40,6 +40,52 @@ try {
     console.log(`${scheme}: ${(share * 100).toFixed(1)}% inked, ${(after * 100).toFixed(1)}% after resize, ${errors.length} errors`);
     await page.close();
   }
+  // The OS theme flips while the page is open: the paper follows without a reload.
+  {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, colorScheme: "light" });
+    await page.goto(url); await page.waitForTimeout(800);
+    const corner = () => page.evaluate(() => {
+      const c = document.querySelector("canvas"), s = document.createElement("canvas"); s.width = c.width; s.height = c.height;
+      const x = s.getContext("2d"); x.drawImage(c, 0, 0); return [...x.getImageData(c.width - 3, c.height - 3, 1, 1).data.slice(0, 3)];
+    });
+    const light = await corner();
+    await page.emulateMedia({ colorScheme: "dark" }); await page.waitForTimeout(500);
+    const darkPx = await corner();
+    if (light.join() !== "255,255,255") fail(`theme: light corner is ${light}`);
+    if (darkPx.join() !== "11,11,12") fail(`theme: dark corner is ${darkPx}`);
+    // A hidden tab pauses the loop and comes back without errors.
+    await page.evaluate(() => { Object.defineProperty(document, "hidden", { value: true, configurable: true }); document.dispatchEvent(new Event("visibilitychange")); });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { Object.defineProperty(document, "hidden", { value: false, configurable: true }); document.dispatchEvent(new Event("visibilitychange")); });
+    await page.waitForTimeout(500);
+    if ((await inked(page, [11, 11, 12])) < 0.005) fail("visibility: blank after coming back");
+    console.log(`theme flip: ${light} → ${darkPx}`);
+    await page.close();
+  }
+  // Reduced motion: one still frame, no loop.
+  {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+    await page.goto(url); await page.waitForTimeout(1000);
+    const mode = await page.evaluate(() => window.ink?.mode);
+    if (mode !== "still") fail(`reduced motion: mode is ${mode}`);
+    if ((await inked(page, [255, 255, 255])) < 0.005) fail("reduced motion: still frame is blank");
+    console.log(`reduced motion: ${mode}`);
+    await page.close();
+  }
+  // No WebGL2: the text-art fallback shows and nothing throws.
+  {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = []; page.on("pageerror", (e) => errors.push(e.message));
+    await page.addInitScript(() => {
+      const get = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, ...rest) { return type === "webgl2" ? null : get.call(this, type, ...rest); };
+    });
+    await page.goto(url); await page.waitForTimeout(800);
+    const shown = await page.evaluate(() => { const p = document.querySelector(".ink-fallback"); return !!p && !p.hidden && p.textContent.length > 1000; });
+    if (!shown || errors.length) fail(`fallback: shown=${shown} errors=${errors.join(" | ")}`);
+    console.log(`fallback: shown=${shown}`);
+    await page.close();
+  }
 } finally {
   await browser.close();
   server.close();

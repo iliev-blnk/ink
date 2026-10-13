@@ -18,6 +18,7 @@ canvas { position:fixed; inset:0; width:100vw; height:100vh; display:block; touc
 .t { position:fixed; left:32px; white-space:pre; }
 .dim { color:var(--mute); }
 a { color:inherit; }
+.ink-fallback { position:fixed; top:24px; right:0; font:12px/12px "IBM Plex Mono", monospace; }
 </style>
 </head>
 <body>
@@ -25,7 +26,7 @@ a { color:inherit; }
 <p class="t" style="top:48px" data-mask><b>ink</b></p>
 <p class="t dim" style="top:65px" data-mask>ink in water, drawn in characters</p>
 <p class="t dim" style="bottom:40px" data-mask>move to stir · click for another ink · <a href="https://github.com/iliev-blnk/ink">source</a></p>
-<pre class="ink-fallback" hidden></pre>
+<pre class="ink-fallback" hidden aria-hidden="true"></pre>
 <script type="module" src="./main.ts"></script>
 </body>
 </html>
