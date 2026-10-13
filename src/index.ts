@@ -24,6 +24,8 @@ export interface InkOptions {
   seed?: number;
   /** Shown with a still frame of ink when WebGL2 isn't available. */
   fallback?: HTMLElement;
+  /** Scales every drop's size and amount; above 1 for a small canvas such as a header band. */
+  strength?: number;
 }
 
 export interface Ink {
@@ -59,6 +61,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
   let lookName: LookName = opts.look ?? lookFor(dark.matches);
+  const k = opts.strength ?? 1;
   let look = LOOKS[lookName];
 
   const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, preserveDrawingBuffer: true });
@@ -82,7 +85,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
       const tall = height > width;
       fluid.splat(tall ? 0.25 + rand() * 0.5 : 0.55 + rand() * 0.3, tall ? 0.1 + rand() * 0.3 : 0.3 + rand() * 0.4,
         (rand() - 0.5) * SEED.force, (rand() - 0.5) * SEED.force,
-        dyeColour(look, i, SEED.amount), SEED.radius);
+        dyeColour(look, i, SEED.amount), SEED.radius * k);
     }
   }
 
@@ -119,7 +122,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
     ghostT += dt;
     const next = ghostAt(ghostT, height > width);
     fluid.splat(next.x, next.y, (next.x - ghost.x) * GHOST.force, (next.y - ghost.y) * GHOST.force,
-      dyeColour(look, Math.floor(ghostT / 9), GHOST.amount), GHOST.radius);
+      dyeColour(look, Math.floor(ghostT / 9), GHOST.amount * Math.min(k, 2)), GHOST.radius * k);
     ghost = next;
   }
 
@@ -151,7 +154,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
     prev = now;
     if (ptr.moved) {
       const at = { x: ptr.x, y: ptr.y }, { dx, dy } = strokeDelta(ptr.prev, at, ptr.gap);
-      fluid.splat(at.x, at.y, dx * POINTER.force, dy * POINTER.force, dyeColour(look, ink, POINTER.amount), POINTER.radius);
+      fluid.splat(at.x, at.y, dx * POINTER.force, dy * POINTER.force, dyeColour(look, ink, POINTER.amount), POINTER.radius * k);
       ptr.prev = at; ptr.moved = false;
     }
     if (owner(now, ptr.last) === "ghost") stirGhost(dt);

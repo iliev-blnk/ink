@@ -53,6 +53,7 @@ mountInk(document.querySelector("canvas")!, {
 ```
 
 The options are:
+- `strength`: scales drop size and amount, for a small canvas such as a header band.
 - `look`: `"night"` or `"blue"`, to override the system theme.
 - `seed`: makes the opening drops repeatable.
 - `font`: the glyph font.
