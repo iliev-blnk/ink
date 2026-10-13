@@ -33,6 +33,8 @@ export interface Ink {
   refreshMask(): void;
   /** "live", "still" (reduced motion) or "fallback" (no WebGL2). */
   readonly mode: "live" | "still" | "fallback";
+  /** Force a look, for a page's own theme toggle; null follows the system again. */
+  setLook(look: LookName | null): void;
 }
 
 const POINTER = { amount: 0.45, radius: 0.0001, force: 6000 };
@@ -54,7 +56,16 @@ function showFallback(canvas: HTMLCanvasElement, el: HTMLElement | undefined, lo
     el.style.color = `rgb(${r} ${g} ${b})`;
     el.hidden = false;
   }
-  return { destroy() {}, refreshMask() {}, mode: "fallback" };
+  const paint = (name: LookName) => {
+    if (!el) return;
+    const [r, g, b] = LOOKS[name].inks[0].map((c) => Math.round(c * 255));
+    el.style.color = `rgb(${r} ${g} ${b})`;
+    el.textContent = STILL[name];
+  };
+  return {
+    destroy() {}, refreshMask() {}, mode: "fallback",
+    setLook(name) { paint(name ?? lookFor(matchMedia("(prefers-color-scheme: dark)").matches)); },
+  };
 }
 
 export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink {
@@ -170,14 +181,16 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   let visible = true;
   const sync = () => (visible && !document.hidden ? start() : stop());
   const io = new IntersectionObserver((e) => { visible = e[e.length - 1].isIntersecting; sync(); });
-  const onTheme = () => {
-    if (opts.look) return;
-    lookName = lookFor(dark.matches);
+  let forced: LookName | null = opts.look ?? null;
+  function applyLook(name: LookName) {
+    if (name === lookName) return;
+    lookName = name;
     look = LOOKS[lookName];
     fluid.clearDye();
     seed();
     if (mode === "still") drawStill();
-  };
+  }
+  const onTheme = () => { if (!forced) applyLook(lookFor(dark.matches)); };
   const onCalm = () => { mode = calm.matches ? "still" : "live"; if (mode === "still") { stop(); drawStill(); } else sync(); };
 
   addEventListener("pointermove", onMove);
@@ -194,6 +207,7 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   return {
     refreshMask,
     get mode() { return mode; },
+    setLook(name) { forced = name; applyLook(name ?? lookFor(dark.matches)); },
     destroy() {
       stop();
       ro.disconnect(); io.disconnect();

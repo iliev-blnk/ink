@@ -59,7 +59,14 @@ try {
     await page.evaluate(() => { Object.defineProperty(document, "hidden", { value: false, configurable: true }); document.dispatchEvent(new Event("visibilitychange")); });
     await page.waitForTimeout(500);
     if ((await inked(page, [11, 11, 12])) < 0.005) fail("visibility: blank after coming back");
-    console.log(`theme flip: ${light} → ${darkPx}`);
+    // A page's own theme toggle overrides the system setting, and can hand it back.
+    await page.evaluate(() => window.ink.setLook("blue")); await page.waitForTimeout(300);
+    const forced = await corner();
+    if (forced.join() !== "255,255,255") fail(`setLook: forced blue corner is ${forced}`);
+    await page.evaluate(() => window.ink.setLook(null)); await page.waitForTimeout(300);
+    const back = await corner();
+    if (back.join() !== "11,11,12") fail(`setLook: back to system gives ${back}`);
+    console.log(`theme flip: ${light} → ${darkPx}, forced ${forced}, back ${back}`);
     await page.close();
   }
   // Reduced motion: one still frame, no loop.

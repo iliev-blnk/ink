@@ -58,8 +58,9 @@ The options are:
 - `seed`: makes the opening drops repeatable.
 - `font`: the glyph font.
 
-`mountInk` returns `{ destroy, refreshMask, mode }`, where `mode` is `"live"`, `"still"` or
-`"fallback"`.
+`mountInk` returns `{ destroy, refreshMask, setLook, mode }`:
+- `mode` is `"live"`, `"still"` or `"fallback"`.
+- `setLook("night" | "blue" | null)` forces a look for a page's own theme toggle; `null` follows the system again.
 
 ## Develop
 
