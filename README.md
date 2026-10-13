@@ -54,6 +54,7 @@ mountInk(document.querySelector("canvas")!, {
 
 The options are:
 - `strength`: scales drop size and amount, for a small canvas such as a header band.
+- `ghost(t, portrait)`: where the unseen hand stirs when nobody else does, in 0..1 page units with y up.
 - `look`: `"night"` or `"blue"`, to override the system theme.
 - `seed`: makes the opening drops repeatable.
 - `font`: the glyph font.

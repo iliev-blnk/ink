@@ -26,6 +26,8 @@ export interface InkOptions {
   fallback?: HTMLElement;
   /** Scales every drop's size and amount; above 1 for a small canvas such as a header band. */
   strength?: number;
+  /** Where the unseen hand stirs at time t (seconds), in 0..1 page units with y up. Defaults to `ghostAt`. */
+  ghost?: (t: number, portrait: boolean) => { x: number; y: number };
 }
 
 export interface Ink {
@@ -128,10 +130,10 @@ export function mountInk(canvas: HTMLCanvasElement, opts: InkOptions = {}): Ink 
   };
   const onDown = () => { ink++; };
 
-  let ghostT = 0, ghost = ghostAt(0);
+  let ghostT = 0, ghost = (opts.ghost ?? ghostAt)(0, false);
   function stirGhost(dt: number) {
     ghostT += dt;
-    const next = ghostAt(ghostT, height > width);
+    const next = (opts.ghost ?? ghostAt)(ghostT, height > width);
     fluid.splat(next.x, next.y, (next.x - ghost.x) * GHOST.force, (next.y - ghost.y) * GHOST.force,
       dyeColour(look, Math.floor(ghostT / 9), GHOST.amount * Math.min(k, 2)), GHOST.radius * k);
     ghost = next;
