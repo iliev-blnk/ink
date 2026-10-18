@@ -11,7 +11,7 @@ mode.
 
 ![Blue ink on white, drawn in characters](docs/ink-light.gif)
 
-It runs as the homepage of [my portfolio](https://github.com/iliev-blnk). It has no
+It runs as the homepage of [my portfolio](https://ilyushavb.pages.dev). It has no
 dependencies and is under 8 KB gzipped, including the fallback frames.
 
 ## How it works
